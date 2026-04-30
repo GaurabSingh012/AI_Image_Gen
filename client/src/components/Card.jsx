@@ -1,30 +1,48 @@
 import React from 'react';
-import { downloadImage } from '../utils';
 
-/**
- * Renders an individual image post within the gallery grid.
- */
-const Card = ({ _id, name, prompt, photo }) => {
+const Card = ({ _id, name, prompt, photo, onImageClick }) => {
+  const handleDownload = (e, id, url) => {
+    e.stopPropagation(); 
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `VisionAI_${id}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="rounded-xl group relative shadow-card hover:shadow-cardhover card">
+    <div 
+      onClick={() => onImageClick({ name, prompt, photo })}
+      className="rounded-xl group relative overflow-hidden border border-zinc-800 hover:border-indigo-500/50 transition-all duration-300 shadow-md cursor-zoom-in bg-zinc-900"
+    >
       <img
         className="w-full h-auto object-cover rounded-xl"
         src={photo}
         alt={prompt}
+        loading="lazy"
       />
-      {/* Hidden by default, slides up on hover */}
-      <div className="group-hover:flex flex-col max-h-[94.5%] hidden absolute bottom-0 left-0 right-0 bg-[#10131f] m-2 p-4 rounded-md opacity-95 transition-all">
-        <p className="text-white text-md overflow-y-auto prompt">{prompt}</p>
+      
+      <div className="group-hover:opacity-100 opacity-0 absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent p-4 transition-all duration-300 flex flex-col justify-end">
+        <p className="text-zinc-200 text-sm leading-snug mb-3 line-clamp-3">
+          {prompt}
+        </p>
 
-        <div className="mt-5 flex justify-between items-center gap-2">
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full object-cover bg-green-700 flex justify-center items-center text-white text-xs font-bold">
-              {name[0]}
+            <div className="w-7 h-7 rounded-full flex justify-center items-center bg-indigo-600 text-white text-xs font-bold shadow-sm">
+              {name[0].toUpperCase()}
             </div>
-            <p className="text-white text-sm">{name}</p>
+            <p className="text-white text-xs font-medium truncate max-w-[120px]">{name}</p>
           </div>
-          <button type="button" onClick={() => downloadImage(_id, photo)} className="outline-none bg-transparent border-none text-white font-bold text-xl cursor-pointer">
-            ↓
+          
+          <button 
+            type="button" 
+            onClick={(e) => handleDownload(e, _id, photo)} 
+            className="w-8 h-8 flex justify-center items-center bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-md transition-colors text-white"
+            title="Download Image"
+          >
+            <span className="font-bold">↓</span>
           </button>
         </div>
       </div>

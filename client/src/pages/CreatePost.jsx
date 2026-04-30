@@ -10,6 +10,15 @@ const CreatePost = () => {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = form.photo;
+    link.download = `VisionAI_${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const generateImage = async () => {
     if (form.prompt) {
       try {
@@ -19,12 +28,11 @@ const CreatePost = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: form.prompt }),
         });
-
         const data = await response.json();
         if (data.photo) {
-          setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+          setForm({ ...form, photo: `data:image/png;base64,${data.photo}` });
         } else {
-          alert(data.message || 'Error generating image');
+          alert('Error generating image');
         }
       } catch (err) {
         alert(err);
@@ -32,7 +40,7 @@ const CreatePost = () => {
         setGeneratingImg(false);
       }
     } else {
-      alert('Please provide proper prompt');
+      alert('Please provide a prompt');
     }
   };
 
@@ -46,7 +54,6 @@ const CreatePost = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form),
         });
-
         await response.json();
         navigate('/'); 
       } catch (err) {
@@ -55,52 +62,76 @@ const CreatePost = () => {
         setLoading(false);
       }
     } else {
-      alert('Please generate an image with proper details');
+      alert('Generate an image first!');
     }
   };
 
   return (
-    <section className="max-w-7xl mx-auto">
-      <div>
-        <h1 className="font-extrabold text-[#222328] text-[32px]">Create</h1>
-        <p className="mt-2 text-[#666e75] text-[14px] max-w-[500px]">
-          Generate an imaginative image through Stable Diffusion AI and share it with the community
+    <section className="w-full">
+      <div className="mb-10">
+        <h1 className="font-extrabold text-white text-4xl tracking-tight">Studio Workspace</h1>
+        <p className="mt-2 text-zinc-400 text-base max-w-2xl">
+          Describe your vision in detail. Our AI will synthesize it into a high-fidelity image in seconds.
         </p>
       </div>
 
-      <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-5">
-          <FormField labelName="Your Name" type="text" name="name" placeholder="John Doe" value={form.name} handleChange={handleChange} />
-          <FormField labelName="Prompt" type="text" name="prompt" placeholder="A futuristic cyberpunk city skyline at sunset, digital art" value={form.prompt} handleChange={handleChange} />
-
-          <div className="relative bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-3 h-64 flex justify-center items-center">
-            {form.photo ? (
-              <img src={form.photo} alt={form.prompt} className="w-full h-full object-contain" />
-            ) : (
-              <span className="text-gray-400">Preview Area</span>
-            )}
-
-            {generatingImg && (
-              <div className="absolute inset-0 z-0 flex justify-center items-center bg-[rgba(0,0,0,0.5)] rounded-lg">
-                <Loader />
-              </div>
-            )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5 bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
+            <FormField labelName="Creator Name" type="text" name="name" placeholder="Gaurab K." value={form.name} handleChange={handleChange} />
+            <FormField labelName="Image Prompt" type="text" name="prompt" placeholder="A neon-lit cyberpunk city at midnight, highly detailed, 8k..." value={form.prompt} handleChange={handleChange} />
+            
+            <button 
+              type="button" 
+              onClick={generateImage} 
+              disabled={generatingImg || !form.prompt}
+              className={`mt-4 w-full py-3.5 rounded-lg font-semibold text-sm transition-all duration-300 ${generatingImg ? 'bg-indigo-600/50 text-white/70 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
+            >
+              {generatingImg ? 'Synthesizing Image...' : '✨ Generate Artwork'}
+            </button>
           </div>
         </div>
 
-        <div className="mt-5 flex gap-5">
-          <button type="button" onClick={generateImage} className="text-white bg-green-700 font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center">
-            {generatingImg ? 'Generating...' : 'Generate Image'}
-          </button>
-        </div>
+        <div className="flex flex-col gap-6">
+          <div className="relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden w-full aspect-square flex justify-center items-center shadow-lg">
+            {form.photo ? (
+              <img src={form.photo} alt={form.prompt} className="w-full h-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center text-zinc-600">
+                <svg className="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span className="font-medium">Canvas Awaiting Input</span>
+              </div>
+            )}
 
-        <div className="mt-10">
-          <p className="mt-2 text-[#666e75] text-[14px]">Once you have created the image you want, you can share it with others in the community</p>
-          <button type="submit" className="mt-3 text-white bg-[#6469ff] font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center">
-            {loading ? 'Sharing...' : 'Share with the Community'}
-          </button>
+            {generatingImg && (
+              <div className="absolute inset-0 z-10 flex flex-col justify-center items-center bg-black/80 backdrop-blur-sm">
+                <Loader />
+                <span className="mt-4 text-indigo-400 font-medium animate-pulse text-sm">Rendering via FLUX.1...</span>
+              </div>
+            )}
+          </div>
+
+          {form.photo && (
+            <div className="flex gap-4 w-full animate-fade-in">
+              <button 
+                type="button" 
+                onClick={handleDownload} 
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-medium py-3 rounded-lg transition-colors flex justify-center items-center gap-2 text-sm"
+              >
+                <span className="font-bold">↓</span> Download HD
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={handleSubmit} 
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 rounded-lg transition-colors text-sm"
+              >
+                {loading ? 'Publishing...' : '🌎 Share to Feed'}
+              </button>
+            </div>
+          )}
         </div>
-      </form>
+      </div>
     </section>
   );
 };

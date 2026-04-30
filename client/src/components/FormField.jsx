@@ -1,20 +1,13 @@
 import React from 'react';
 
-const FormField = ({ labelName, type, name, placeholder, value, handleChange, isSurpriseMe, handleSurpriseMe }) => (
-  <div>
-    <div className="flex items-center gap-2 mb-2">
-      <label htmlFor={name} className="block text-sm font-medium text-gray-900">
-        {labelName}
-      </label>
-      {isSurpriseMe && (
-        <button type="button" onClick={handleSurpriseMe} className="font-semibold text-xs bg-[#ECECF1] py-1 px-2 rounded-[5px] text-black">
-          Surprise me
-        </button>
-      )}
-    </div>
+const FormField = ({ labelName, type, name, placeholder, value, handleChange }) => (
+  <div className="flex flex-col gap-2 w-full">
+    <label htmlFor={name} className="block text-sm font-medium text-zinc-400">
+      {labelName}
+    </label>
     <input
       type={type} id={name} name={name} placeholder={placeholder} value={value} onChange={handleChange} required
-      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3"
+      className="bg-zinc-900 border border-zinc-800 text-zinc-100 text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none block w-full p-3.5 transition-all placeholder:text-zinc-600"
     />
   </div>
 );
