@@ -4,41 +4,49 @@ import Post from '../models/post.js';
 
 dotenv.config();
 
-// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// GET all posts
-export const getAllPosts = async (req, res) => {
+export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find({});
     res.status(200).json({ success: true, data: posts });
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({ success: false, message: 'Fetching posts failed, please try again' });
   }
 };
 
-// CREATE a post
 export const createPost = async (req, res) => {
   try {
     const { name, prompt, photo } = req.body;
-
-    // Upload the base64 string to Cloudinary
+    
+    // Upload the Base64 string to Cloudinary
     const photoUrl = await cloudinary.uploader.upload(photo);
-
-    // Save the post metadata and the Cloudinary URL to MongoDB
+    
+    // Create the database document, attaching the verified user's ID
     const newPost = await Post.create({
       name,
       prompt,
       photo: photoUrl.secure_url,
+      creator: req.user._id // THIS IS THE PATCH: securely links image to the logged-in user
     });
 
     res.status(200).json({ success: true, data: newPost });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: 'Unable to create a post, please try again' });
+  }
+};
+
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Post.findByIdAndDelete(id); 
+    res.status(200).json({ success: true, message: 'Post deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete post' });
   }
 };

@@ -1,11 +1,25 @@
 import mongoose from 'mongoose';
 
-const Post = new mongoose.Schema({
-  name: { type: String, required: true },
-  prompt: { type: String, required: true },
-  photo: { type: String, required: true }, // This will store the Cloudinary URL
-});
+const PostSchema = new mongoose.Schema({
+  name: { 
+    type: String, 
+    required: true 
+  },
+  prompt: { 
+    type: String, 
+    required: true 
+  },
+  photo: { 
+    type: String, 
+    required: true 
+  },
+  // The crucial new field: permanently links this post to a specific User ID
+  creator: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  }
+}, { timestamps: true });
 
-const PostSchema = mongoose.model('Post', Post);
-
-export default PostSchema;
+const Post = mongoose.model('Post', PostSchema);
+export default Post;
